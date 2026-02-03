@@ -33,12 +33,14 @@ body {
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 1s ease-in-out, transform 5s ease;
+  transition: opacity 1s ease-in-out, transform 5s ease, filter 3s ease;
+  filter: drop-shadow(0 0 0 rgba(255,255,255,0));
 }
 
 .slideshow img.active {
   opacity: 1;
-  transform: scale(1.015); /* zoom reduced */
+  transform: scale(1.015);
+  filter: drop-shadow(0 0 25px rgba(255, 200, 220, 0.45)); /* soft glow */
 }
 
 /* Overlay */
@@ -97,7 +99,7 @@ p {
 .buttons {
   margin-top: 20px;
   position: relative;
-  height: 50px;
+  height: 60px;
 }
 
 button {
@@ -121,7 +123,7 @@ button {
 /* Hearts */
 .heart {
   position: fixed;
-  font-size: 24px;
+  font-size: 26px;
   animation: fall linear forwards;
   z-index: 7;
 }
@@ -203,11 +205,16 @@ const bgMusic = document.getElementById("bgMusic");
 let current = 0;
 let started = false;
 
-// NO button escape 😈
+// SMART NO BUTTON (FULL SCREEN ESCAPE 😈)
 noBtn.addEventListener("mouseenter", () => {
-  const x = Math.random() * 200 - 100;
-  const y = Math.random() * 80 - 40;
-  noBtn.style.transform = `translate(${x}px, ${y}px)`;
+  const maxX = window.innerWidth - noBtn.offsetWidth;
+  const maxY = window.innerHeight - noBtn.offsetHeight;
+
+  const x = Math.random() * maxX;
+  const y = Math.random() * maxY;
+
+  noBtn.style.left = x + "px";
+  noBtn.style.top = y + "px";
 });
 
 // YES clicked ❤️
@@ -215,7 +222,7 @@ yesBtn.addEventListener("click", () => {
   if (started) return;
   started = true;
 
-  // Start music safely
+  // Start music
   bgMusic.volume = 0.6;
   bgMusic.play().catch(() => {});
 
@@ -225,14 +232,14 @@ yesBtn.addEventListener("click", () => {
 
   images[0].classList.add("active");
 
-  // Slideshow speed
+  // Slideshow
   setInterval(() => {
     images[current].classList.remove("active");
     current = (current + 1) % images.length;
     images[current].classList.add("active");
   }, 2000);
 
-  // Show love message
+  // Show message
   setTimeout(() => {
     loveMessage.classList.add("show");
   }, 1200);
@@ -241,25 +248,26 @@ yesBtn.addEventListener("click", () => {
   startCelebration();
 });
 
-// Heavy heart shower ❤️❤️❤️
+// HEART SHOWER (more + colors ❤️💖💗)
 function startHeartRain() {
+  const hearts = ["❤️","💖","💗"];
   setInterval(() => {
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 4; i++) {
       const heart = document.createElement("div");
       heart.className = "heart";
-      heart.innerText = "❤️";
+      heart.innerText = hearts[Math.floor(Math.random()*hearts.length)];
       heart.style.left = Math.random() * 100 + "vw";
       heart.style.animationDuration = Math.random() * 2 + 2 + "s";
       document.body.appendChild(heart);
 
       setTimeout(() => heart.remove(), 4500);
     }
-  }, 250);
+  }, 220);
 }
 
-// Celebration burst 🎉✨
+// Celebration burst ✨🎉
 function startCelebration() {
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < 45; i++) {
     const sparkle = document.createElement("div");
     sparkle.className = "sparkle";
     sparkle.innerText = "✨";
