@@ -108,7 +108,6 @@ button {
   cursor: pointer;
   position: absolute;
   top: 0;
-  transition: transform 0.2s ease;
 }
 
 #yes {
@@ -117,13 +116,9 @@ button {
   left: 0;
 }
 
-#yes:hover {
-  transform: scale(1.05);
-}
-
 #no {
   background: #ddd;
-  left: 150px;
+  left: 150px; /* beside YES on load */
 }
 
 /* Hearts */
@@ -218,7 +213,6 @@ button {
 <script>
 const noBtn = document.getElementById("no");
 const yesBtn = document.getElementById("yes");
-const buttons = document.querySelector(".buttons");
 const card = document.getElementById("card");
 const slideshow = document.getElementById("slideshow");
 const overlay = document.getElementById("overlay");
@@ -227,9 +221,10 @@ const loveMessage = document.getElementById("loveMessage");
 const bgMusic = document.getElementById("bgMusic");
 
 let started = false;
+let escaped = false;
 let current = 0;
 
-/* NO BUTTON ESCAPES (CONSTRAINED) */
+/* NO BUTTON ESCAPES ACROSS SCREEN */
 document.addEventListener("mousemove", e => {
   if (started) return;
 
@@ -240,9 +235,15 @@ document.addEventListener("mousemove", e => {
   );
 
   if (d < 120) {
-    const pr = buttons.getBoundingClientRect();
-    const maxX = pr.width - r.width;
-    const maxY = pr.height - r.height;
+
+    /* switch to full-screen escape mode */
+    if (!escaped) {
+      escaped = true;
+      noBtn.style.position = "fixed";
+    }
+
+    const maxX = window.innerWidth - r.width - 20;
+    const maxY = window.innerHeight - r.height - 20;
 
     noBtn.style.left = Math.random() * maxX + "px";
     noBtn.style.top = Math.random() * maxY + "px";
