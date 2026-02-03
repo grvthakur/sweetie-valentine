@@ -17,7 +17,7 @@ body {
   overflow: hidden;
 }
 
-/* Background video iframe */
+/* Google Drive Video Background */
 .video-bg {
   position: fixed;
   top: 50%;
@@ -25,12 +25,12 @@ body {
   width: 120vw;
   height: 120vh;
   transform: translate(-50%, -50%);
+  border: none;
   z-index: -2;
   pointer-events: none;
-  border: none;
 }
 
-/* Light overlay for readability */
+/* Dark overlay for readability */
 .overlay {
   position: fixed;
   inset: 0;
@@ -60,6 +60,7 @@ p {
   font-size: 15px;
 }
 
+/* Buttons */
 .buttons {
   margin-top: 20px;
   position: relative;
@@ -100,8 +101,9 @@ button {
 
 <body>
 
-<!-- GOOGLE DRIVE BACKGROUND VIDEO -->
+<!-- GOOGLE DRIVE VIDEO (initially paused) -->
 <iframe
+  id="driveVideo"
   class="video-bg"
   src="https://drive.google.com/file/d/1U3hdjLUHT0fzRA4IoItob7T5nSwN3mj3/preview"
   allow="autoplay">
@@ -119,6 +121,10 @@ button {
 
   <h1>Will you be my Valentine? 🌹</h1>
 
+  <p style="font-size:12px;color:#999;">
+    Tap YES to start our moment 🎶❤️
+  </p>
+
   <div class="buttons">
     <button id="yes">YES ❤️</button>
     <button id="no">NO 🙈</button>
@@ -129,16 +135,22 @@ button {
 const noBtn = document.getElementById("no");
 const yesBtn = document.getElementById("yes");
 const card = document.getElementById("card");
+const iframe = document.getElementById("driveVideo");
 
-// NO button escape 😈
+// NO button runs away 😈
 noBtn.addEventListener("mouseenter", () => {
   const x = Math.random() * 200 - 100;
   const y = Math.random() * 80 - 40;
   noBtn.style.transform = `translate(${x}px, ${y}px)`;
 });
 
-// YES clicked ❤️
+// YES clicked ❤️ → START VIDEO
 yesBtn.addEventListener("click", () => {
+
+  // Reload iframe with autoplay enabled
+  iframe.src =
+    "https://drive.google.com/file/d/1U3hdjLUHT0fzRA4IoItob7T5nSwN3mj3/preview?autoplay=1";
+
   card.innerHTML = `
     <h1>Yaaay! 😍💖</h1>
     <p>
@@ -151,6 +163,7 @@ yesBtn.addEventListener("click", () => {
   startHeartRain();
 });
 
+// Heart rain ❤️
 function startHeartRain() {
   setInterval(() => {
     const heart = document.createElement("div");
