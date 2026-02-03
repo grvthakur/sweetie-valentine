@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>For My Sweety ❤️</title>
+<title>For My Sweetie Baby 😘</title>
 
 <style>
 * {
@@ -33,12 +33,12 @@ body {
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 1.2s ease-in-out, transform 5s ease;
+  transition: opacity 1.1s ease-in-out, transform 5s ease;
 }
 
 .slideshow img.active {
   opacity: 1;
-  transform: scale(1.05);
+  transform: scale(1.035);
 }
 
 /* Overlay */
@@ -135,6 +135,9 @@ button {
 
 <body>
 
+<!-- BACKGROUND MUSIC -->
+<audio id="bgMusic" src="music.mp3" loop></audio>
+
 <!-- SLIDESHOW -->
 <div class="slideshow" id="slideshow">
   <img src="images/1.jpg">
@@ -154,7 +157,7 @@ button {
 <!-- LOVE MESSAGE -->
 <div class="love-message" id="loveMessage">
   Forever yours 💍❤️<br>
-  Thank you for choosing me, my Sweety 😘
+  Thank you for choosing me, my Sweetie Baby 😘
 </div>
 
 <!-- CARD -->
@@ -163,7 +166,7 @@ button {
   <p>
     From smiles to silence,<br>
     from chaos to calm…<br>
-    you are my favorite feeling, Sweety 😏
+    you are my favorite feeling, Sweetie Baby 😘
   </p>
 
   <h1>Will you be my Valentine? 🌹</h1>
@@ -182,6 +185,7 @@ const slideshow = document.getElementById("slideshow");
 const overlay = document.getElementById("overlay");
 const images = slideshow.querySelectorAll("img");
 const loveMessage = document.getElementById("loveMessage");
+const bgMusic = document.getElementById("bgMusic");
 
 let current = 0;
 let started = false;
@@ -198,13 +202,17 @@ yesBtn.addEventListener("click", () => {
   if (started) return;
   started = true;
 
+  // Start music 🎶
+  bgMusic.volume = 0.6;
+  bgMusic.play();
+
   card.style.display = "none";
   slideshow.style.display = "block";
   overlay.style.display = "block";
 
   images[0].classList.add("active");
 
-  // Faster slideshow (2 seconds)
+  // Faster slideshow (2s)
   setInterval(() => {
     images[current].classList.remove("active");
     current = (current + 1) % images.length;
@@ -219,18 +227,18 @@ yesBtn.addEventListener("click", () => {
   startHeartRain();
 });
 
-// Hearts animation
+// Continuous heart shower ❤️
 function startHeartRain() {
   setInterval(() => {
     const heart = document.createElement("div");
     heart.className = "heart";
     heart.innerText = "❤️";
-    heart.style.left = Math.random() * 1000 + "vw";
-    heart.style.animationDuration = Math.random() * 2 + 3 + "s";
+    heart.style.left = Math.random() * 100 + "vw";
+    heart.style.animationDuration = Math.random() * 2 + 2.5 + "s";
     document.body.appendChild(heart);
 
-    setTimeout(() => heart.remove(), 5000);
-  }, 300);
+    setTimeout(() => heart.remove(), 4500);
+  }, 250);
 }
 </script>
 
