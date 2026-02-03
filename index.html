@@ -33,7 +33,7 @@ body {
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 1.5s ease-in-out, transform 6s ease;
+  transition: opacity 1.2s ease-in-out, transform 5s ease;
 }
 
 .slideshow img.active {
@@ -48,6 +48,25 @@ body {
   background: rgba(0,0,0,0.35);
   z-index: 2;
   display: none;
+}
+
+/* Love message */
+.love-message {
+  position: fixed;
+  bottom: 14%;
+  width: 100%;
+  text-align: center;
+  font-size: 22px;
+  color: white;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+  z-index: 5;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.6);
+}
+
+.love-message.show {
+  opacity: 1;
 }
 
 /* Card */
@@ -104,7 +123,7 @@ button {
   position: fixed;
   font-size: 20px;
   animation: fall linear forwards;
-  z-index: 4;
+  z-index: 6;
 }
 
 @keyframes fall {
@@ -132,6 +151,12 @@ button {
 
 <div class="overlay" id="overlay"></div>
 
+<!-- LOVE MESSAGE -->
+<div class="love-message" id="loveMessage">
+  Forever yours 💍❤️<br>
+  Thank you for choosing me, my Sweety 😘
+</div>
+
 <!-- CARD -->
 <div class="card" id="card">
   <h1>Anamika 💖</h1>
@@ -156,11 +181,12 @@ const card = document.getElementById("card");
 const slideshow = document.getElementById("slideshow");
 const overlay = document.getElementById("overlay");
 const images = slideshow.querySelectorAll("img");
+const loveMessage = document.getElementById("loveMessage");
 
 let current = 0;
 let started = false;
 
-// NO button runs away
+// NO button runs away 😈
 noBtn.addEventListener("mouseenter", () => {
   const x = Math.random() * 200 - 100;
   const y = Math.random() * 80 - 40;
@@ -178,21 +204,28 @@ yesBtn.addEventListener("click", () => {
 
   images[0].classList.add("active");
 
+  // Faster slideshow (2 seconds)
   setInterval(() => {
     images[current].classList.remove("active");
     current = (current + 1) % images.length;
     images[current].classList.add("active");
-  }, 3500);
+  }, 2000);
+
+  // Show love message
+  setTimeout(() => {
+    loveMessage.classList.add("show");
+  }, 1200);
 
   startHeartRain();
 });
 
+// Hearts animation
 function startHeartRain() {
   setInterval(() => {
     const heart = document.createElement("div");
     heart.className = "heart";
     heart.innerText = "❤️";
-    heart.style.left = Math.random() * 100 + "vw";
+    heart.style.left = Math.random() * 1000 + "vw";
     heart.style.animationDuration = Math.random() * 2 + 3 + "s";
     document.body.appendChild(heart);
 
