@@ -33,19 +33,19 @@ body {
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 0.8s ease-in-out, transform 5s ease;
+  transition: opacity 0.8s ease-in-out, transform 6s ease;
 }
 
 .slideshow img.active {
   opacity: 1;
-  transform: scale(1.015);
+  transform: scale(1.08);
 }
 
 /* Overlay */
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0,0,0,0.4);
   z-index: 2;
   display: none;
 }
@@ -60,21 +60,27 @@ body {
   color: white;
   font-weight: 600;
   z-index: 6;
-  text-shadow: 0 4px 10px rgba(0,0,0,0.6);
+  text-shadow: 0 4px 12px rgba(0,0,0,0.7);
 }
 
 /* Card */
 .card {
-  position: relative;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 5;
+}
+
+.card-inner {
   background: white;
   width: 90%;
   max-width: 380px;
   padding: 25px;
   border-radius: 25px;
   text-align: center;
-  box-shadow: 0 25px 50px rgba(0,0,0,0.35);
-  margin: auto;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.4);
 }
 
 h1 {
@@ -87,35 +93,32 @@ p {
   font-size: 15px;
 }
 
-/* Buttons container */
+/* Buttons */
 .buttons {
-  margin-top: 20px;
+  margin-top: 22px;
   position: relative;
   height: 60px;
 }
 
-/* Buttons */
 button {
-  padding: 12px 25px;
+  padding: 12px 26px;
   border-radius: 30px;
   border: none;
   font-size: 16px;
   cursor: pointer;
-  position: relative;
-  z-index: 10;
+  position: absolute;
+  top: 0;
 }
 
 #yes {
   background: #ff4d6d;
   color: white;
-  margin-right: 20px;
+  left: 0;
 }
 
 #no {
   background: #ddd;
-  position: absolute;
-  left: 160px; /* start beside YES */
-  top: 0;
+  left: 150px; /* beside YES on load */
 }
 
 /* Hearts */
@@ -127,61 +130,83 @@ button {
 }
 
 @keyframes fall {
-  0% { transform: translateY(-10px); opacity: 1; }
-  100% { transform: translateY(110vh); opacity: 0; }
+  from { transform: translateY(-10vh); opacity: 1; }
+  to { transform: translateY(110vh); opacity: 0; }
 }
 
 /* Fireworks */
 .firework {
   position: fixed;
-  font-size: 32px;
-  animation: explode 1.2s ease-out forwards;
-  z-index: 9;
+  font-size: 38px;
+  animation: explode 2.8s ease-out forwards;
+  z-index: 20;
 }
 
 @keyframes explode {
-  0% { transform: scale(0); opacity: 1; }
-  100% { transform: scale(3); opacity: 0; }
+  from { transform: scale(0); opacity: 1; }
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* Flash */
+.flash {
+  position: fixed;
+  inset: 0;
+  background: white;
+  animation: flash 1.2s ease-out forwards;
+  z-index: 30;
+}
+
+@keyframes flash {
+  0% { opacity: 0; }
+  20% { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+/* Confetti */
+.confetti {
+  position: fixed;
+  font-size: 22px;
+  animation: confettiFall 3.5s linear forwards;
+  z-index: 15;
+}
+
+@keyframes confettiFall {
+  from { transform: translateY(-10vh) rotate(0deg); }
+  to { transform: translateY(110vh) rotate(720deg); }
 }
 </style>
 </head>
 
 <body>
 
-<!-- MUSIC -->
 <audio id="bgMusic" src="music.mp3" loop></audio>
 
-<!-- SLIDESHOW -->
 <div class="slideshow" id="slideshow">
   <img src="images/1.jpg">
   <img src="images/2.jpg">
   <img src="images/3.jpg">
   <img src="images/4.jpg">
   <img src="images/5.jpg">
-  <img src="images/6.jpg">
-  <img src="images/7.jpg">
-  <img src="images/8.jpg">
-  <img src="images/9.jpg">
-  <img src="images/10.jpg">
 </div>
 
 <div class="overlay" id="overlay"></div>
 <div class="love-message" id="loveMessage"></div>
 
-<!-- CARD -->
 <div class="card" id="card">
-  <h1>Anamika 💖</h1>
-  <p>
-    From smiles to silence,<br>
-    from chaos to calm…<br>
-    you are my favorite feeling, Sweetie Baby 😘
-  </p>
+  <div class="card-inner">
+    <h1>Anamika 💖</h1>
+    <p>
+      From smiles to silence,<br>
+      from chaos to calm…<br>
+      you are my favorite feeling, Sweetie Baby 😘
+    </p>
 
-  <h1>Will you be my Valentine? 🌹</h1>
+    <h1>Will you be my Valentine? 🌹</h1>
 
-  <div class="buttons">
-    <button id="yes">YES ❤️</button>
-    <button id="no">NO 🙈</button>
+    <div class="buttons">
+      <button id="yes">YES ❤️</button>
+      <button id="no">NO 🙈</button>
+    </div>
   </div>
 </div>
 
@@ -195,93 +220,122 @@ const images = slideshow.querySelectorAll("img");
 const loveMessage = document.getElementById("loveMessage");
 const bgMusic = document.getElementById("bgMusic");
 
-let current = 0;
 let started = false;
+let escaped = false;
+let current = 0;
 
-/* MOVE NO BUTTON AWAY FROM CURSOR 😈 */
-document.addEventListener("mousemove", (e) => {
-  const rect = noBtn.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
+/* NO BUTTON ESCAPES ACROSS SCREEN */
+document.addEventListener("mousemove", e => {
+  if (started) return;
 
-  const distance = Math.hypot(e.clientX - cx, e.clientY - cy);
+  const r = noBtn.getBoundingClientRect();
+  const d = Math.hypot(
+    e.clientX - (r.left + r.width / 2),
+    e.clientY - (r.top + r.height / 2)
+  );
 
-  if (distance < 120) {
-    const maxX = window.innerWidth - rect.width - 20;
-    const maxY = window.innerHeight - rect.height - 20;
+  if (d < 120) {
+
+    /* switch to full-screen escape mode */
+    if (!escaped) {
+      escaped = true;
+      noBtn.style.position = "fixed";
+    }
+
+    const maxX = window.innerWidth - r.width - 20;
+    const maxY = window.innerHeight - r.height - 20;
 
     noBtn.style.left = Math.random() * maxX + "px";
     noBtn.style.top = Math.random() * maxY + "px";
   }
 });
 
-/* YES CLICK ❤️ */
+/* YES CLICK */
 yesBtn.addEventListener("click", () => {
   if (started) return;
   started = true;
 
+  bgMusic.volume = 0.6;
+  bgMusic.play().catch(()=>{});
+
   noBtn.style.display = "none";
-  startFireworks();
+  startCelebration();
 
   setTimeout(() => {
-    bgMusic.volume = 0.6;
-    bgMusic.play().catch(()=>{});
-
     card.style.display = "none";
     slideshow.style.display = "block";
     overlay.style.display = "block";
 
     images[0].classList.add("active");
-
     setInterval(() => {
       images[current].classList.remove("active");
       current = (current + 1) % images.length;
       images[current].classList.add("active");
-    }, 1800);
+    }, 2000);
 
     startHeartRain();
-    startTypingMessage();
-  }, 2000);
+    startTyping();
+  }, 3800);
 });
 
-/* FIREWORKS 🎆 */
-function startFireworks() {
-  for (let i = 0; i < 80; i++) {
-    const f = document.createElement("div");
-    f.className = "firework";
-    f.innerText = "🎆";
-    f.style.left = Math.random() * 100 + "vw";
-    f.style.top = Math.random() * 100 + "vh";
-    document.body.appendChild(f);
-    setTimeout(() => f.remove(), 1200);
+/* CELEBRATION */
+function startCelebration() {
+  const flash = document.createElement("div");
+  flash.className = "flash";
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 1200);
+
+  for (let wave = 0; wave < 8; wave++) {
+    setTimeout(() => {
+      for (let i = 0; i < 90; i++) {
+        const f = document.createElement("div");
+        f.className = "firework";
+        f.textContent = Math.random() > 0.5 ? "🎆" : "✨";
+        f.style.left = Math.random() * 100 + "vw";
+        f.style.top = Math.random() * 100 + "vh";
+        document.body.appendChild(f);
+        setTimeout(() => f.remove(), 2800);
+      }
+    }, wave * 350);
+  }
+
+  const confetti = ["🎉","🎊","❤️","💖","🌹"];
+  for (let i = 0; i < 150; i++) {
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.textContent = confetti[Math.floor(Math.random()*confetti.length)];
+    c.style.left = Math.random() * 100 + "vw";
+    c.style.animationDuration = Math.random() * 2 + 2 + "s";
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 3600);
   }
 }
 
-/* HEART RAIN ❤️💖💗 */
+/* HEART RAIN */
 function startHeartRain() {
   const hearts = ["❤️","💖","💗"];
   setInterval(() => {
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       const h = document.createElement("div");
       h.className = "heart";
-      h.innerText = hearts[Math.floor(Math.random()*hearts.length)];
+      h.textContent = hearts[Math.floor(Math.random()*hearts.length)];
       h.style.left = Math.random() * 100 + "vw";
       h.style.animationDuration = Math.random() * 2 + 2 + "s";
       document.body.appendChild(h);
       setTimeout(() => h.remove(), 4500);
     }
-  }, 220);
+  }, 150);
 }
 
-/* TYPING MESSAGE 💬 */
-function startTypingMessage() {
+/* TYPING MESSAGE */
+function startTyping() {
   const text = "Forever yours 💍❤️\nThank you for choosing me, my Sweetie Baby 😘";
   let i = 0;
   loveMessage.innerHTML = "";
-  const typing = setInterval(() => {
+  const t = setInterval(() => {
     loveMessage.innerHTML += text[i] === "\n" ? "<br>" : text[i];
     i++;
-    if (i >= text.length) clearInterval(typing);
+    if (i >= text.length) clearInterval(t);
   }, 70);
 }
 </script>
