@@ -33,14 +33,14 @@ body {
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 1s ease-in-out, transform 5s ease, filter 3s ease;
+  transition: opacity 0.8s ease-in-out, transform 5s ease, filter 3s ease;
   filter: drop-shadow(0 0 0 rgba(255,255,255,0));
 }
 
 .slideshow img.active {
   opacity: 1;
   transform: scale(1.015);
-  filter: drop-shadow(0 0 25px rgba(255, 200, 220, 0.45)); /* soft glow */
+  filter: drop-shadow(0 0 25px rgba(255, 200, 220, 0.45));
 }
 
 /* Overlay */
@@ -61,14 +61,8 @@ body {
   font-size: 22px;
   color: white;
   font-weight: 600;
-  opacity: 0;
-  transition: opacity 1.5s ease;
   z-index: 6;
   text-shadow: 0 4px 10px rgba(0,0,0,0.6);
-}
-
-.love-message.show {
-  opacity: 1;
 }
 
 /* Card */
@@ -117,7 +111,8 @@ button {
 
 #no {
   background: #ddd;
-  position: absolute;
+  position: fixed; /* IMPORTANT */
+  z-index: 10;
 }
 
 /* Hearts */
@@ -170,10 +165,7 @@ button {
 <div class="overlay" id="overlay"></div>
 
 <!-- LOVE MESSAGE -->
-<div class="love-message" id="loveMessage">
-  Forever yours 💍❤️<br>
-  Thank you for choosing me, my Sweetie Baby 😘
-</div>
+<div class="love-message" id="loveMessage"></div>
 
 <!-- CARD -->
 <div class="card" id="card">
@@ -205,50 +197,65 @@ const bgMusic = document.getElementById("bgMusic");
 let current = 0;
 let started = false;
 
-// SMART NO BUTTON (FULL SCREEN ESCAPE 😈)
-noBtn.addEventListener("mouseenter", () => {
-  const maxX = window.innerWidth - noBtn.offsetWidth;
-  const maxY = window.innerHeight - noBtn.offsetHeight;
+// INITIAL NO BUTTON POSITION
+moveNoButton();
+
+// ULTRA SMART NO BUTTON AVOIDANCE 😈
+document.addEventListener("mousemove", (e) => {
+  const rect = noBtn.getBoundingClientRect();
+  const dx = e.clientX - (rect.left + rect.width / 2);
+  const dy = e.clientY - (rect.top + rect.height / 2);
+  const distance = Math.sqrt(dx*dx + dy*dy);
+
+  if (distance < 120) {
+    moveNoButton();
+  }
+});
+
+// Mobile touch safety
+document.addEventListener("touchstart", () => {
+  moveNoButton();
+});
+
+function moveNoButton() {
+  const padding = 20;
+  const maxX = window.innerWidth - noBtn.offsetWidth - padding;
+  const maxY = window.innerHeight - noBtn.offsetHeight - padding;
 
   const x = Math.random() * maxX;
   const y = Math.random() * maxY;
 
   noBtn.style.left = x + "px";
   noBtn.style.top = y + "px";
-});
+}
 
-// YES clicked ❤️
+// YES CLICK ❤️
 yesBtn.addEventListener("click", () => {
   if (started) return;
   started = true;
 
-  // Start music
   bgMusic.volume = 0.6;
-  bgMusic.play().catch(() => {});
+  bgMusic.play().catch(()=>{});
 
   card.style.display = "none";
+  noBtn.style.display = "none"; // hide NO forever 😌
   slideshow.style.display = "block";
   overlay.style.display = "block";
 
   images[0].classList.add("active");
 
-  // Slideshow
   setInterval(() => {
     images[current].classList.remove("active");
     current = (current + 1) % images.length;
     images[current].classList.add("active");
-  }, 2000);
-
-  // Show message
-  setTimeout(() => {
-    loveMessage.classList.add("show");
-  }, 1200);
+  }, 1800);
 
   startHeartRain();
   startCelebration();
+  startTypingMessage();
 });
 
-// HEART SHOWER (more + colors ❤️💖💗)
+// HEART SHOWER ❤️💖💗
 function startHeartRain() {
   const hearts = ["❤️","💖","💗"];
   setInterval(() => {
@@ -259,24 +266,34 @@ function startHeartRain() {
       heart.style.left = Math.random() * 100 + "vw";
       heart.style.animationDuration = Math.random() * 2 + 2 + "s";
       document.body.appendChild(heart);
-
       setTimeout(() => heart.remove(), 4500);
     }
   }, 220);
 }
 
-// Celebration burst ✨🎉
+// CELEBRATION ✨
 function startCelebration() {
   for (let i = 0; i < 45; i++) {
-    const sparkle = document.createElement("div");
-    sparkle.className = "sparkle";
-    sparkle.innerText = "✨";
-    sparkle.style.left = Math.random() * 100 + "vw";
-    sparkle.style.top = Math.random() * 100 + "vh";
-    document.body.appendChild(sparkle);
-
-    setTimeout(() => sparkle.remove(), 1200);
+    const s = document.createElement("div");
+    s.className = "sparkle";
+    s.innerText = "✨";
+    s.style.left = Math.random() * 100 + "vw";
+    s.style.top = Math.random() * 100 + "vh";
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 1200);
   }
+}
+
+// TYPING MESSAGE 💬❤️
+function startTypingMessage() {
+  const text = "Forever yours 💍❤️\nThank you for choosing me, my Sweetie Baby 😘";
+  let i = 0;
+  loveMessage.innerHTML = "";
+  const typing = setInterval(() => {
+    loveMessage.innerHTML += text[i] === "\n" ? "<br>" : text[i];
+    i++;
+    if (i >= text.length) clearInterval(typing);
+  }, 70);
 }
 </script>
 
