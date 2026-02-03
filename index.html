@@ -15,27 +15,39 @@ body {
   margin: 0;
   min-height: 100vh;
   overflow: hidden;
+  background: linear-gradient(135deg, #ff4d6d, #ffb3c1);
 }
 
-/* Google Drive Video Background */
-.video-bg {
+/* Slideshow background */
+.slideshow {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 120vw;
-  height: 120vh;
-  transform: translate(-50%, -50%);
-  border: none;
+  inset: 0;
   z-index: -2;
-  pointer-events: none;
+  display: none;
 }
 
-/* Dark overlay for readability */
+.slideshow img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out, transform 8s ease;
+}
+
+.slideshow img.active {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+/* Overlay */
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0,0,0,0.35);
   z-index: -1;
+  display: none;
 }
 
 /* Card */
@@ -60,7 +72,6 @@ p {
   font-size: 15px;
 }
 
-/* Buttons */
 .buttons {
   margin-top: 20px;
   position: relative;
@@ -101,15 +112,21 @@ button {
 
 <body>
 
-<!-- GOOGLE DRIVE VIDEO (initially paused) -->
-<iframe
-  id="driveVideo"
-  class="video-bg"
-  src="https://drive.google.com/file/d/1U3hdjLUHT0fzRA4IoItob7T5nSwN3mj3/preview"
-  allow="autoplay">
-</iframe>
+<!-- Slideshow -->
+<div class="slideshow" id="slideshow">
+  <img src="images/1.jpg">
+  <img src="images/2.jpg">
+  <img src="images/3.jpg">
+  <img src="images/4.jpg">
+  <img src="images/5.jpg">
+  <img src="images/6.jpg">
+  <img src="images/7.jpg">
+  <img src="images/8.jpg">
+  <img src="images/9.jpg">
+  <img src="images/10.jpg">
+</div>
 
-<div class="overlay"></div>
+<div class="overlay" id="overlay"></div>
 
 <div class="card" id="card">
   <h1>Anamika 💖</h1>
@@ -121,10 +138,6 @@ button {
 
   <h1>Will you be my Valentine? 🌹</h1>
 
-  <p style="font-size:12px;color:#999;">
-    Tap YES to start our moment 🎶❤️
-  </p>
-
   <div class="buttons">
     <button id="yes">YES ❤️</button>
     <button id="no">NO 🙈</button>
@@ -135,35 +148,39 @@ button {
 const noBtn = document.getElementById("no");
 const yesBtn = document.getElementById("yes");
 const card = document.getElementById("card");
-const iframe = document.getElementById("driveVideo");
+const slideshow = document.getElementById("slideshow");
+const overlay = document.getElementById("overlay");
+const images = slideshow.querySelectorAll("img");
 
-// NO button runs away 😈
+let current = 0;
+
+// NO button escape
 noBtn.addEventListener("mouseenter", () => {
   const x = Math.random() * 200 - 100;
   const y = Math.random() * 80 - 40;
   noBtn.style.transform = `translate(${x}px, ${y}px)`;
 });
 
-// YES clicked ❤️ → START VIDEO
+// YES clicked ❤️
 yesBtn.addEventListener("click", () => {
+  card.style.display = "none";
+  slideshow.style.display = "block";
+  overlay.style.display = "block";
 
-  // Reload iframe with autoplay enabled
-  iframe.src =
-    "https://drive.google.com/file/d/1U3hdjLUHT0fzRA4IoItob7T5nSwN3mj3/preview?autoplay=1";
-
-  card.innerHTML = `
-    <h1>Yaaay! 😍💖</h1>
-    <p>
-      Happy Valentine’s Day, my Sweety 🌹<br><br>
-      Thank you for choosing me every day.
-    </p>
-    <h2>Forever yours 💍❤️</h2>
-  `;
-
+  images[0].classList.add("active");
+  startSlideshow();
   startHeartRain();
 });
 
-// Heart rain ❤️
+function startSlideshow() {
+  setInterval(() => {
+    images[current].classList.remove("active");
+    current = (current + 1) % images.length;
+    images[current].classList.add("active");
+  }, 4000);
+}
+
+// Heart rain
 function startHeartRain() {
   setInterval(() => {
     const heart = document.createElement("div");
