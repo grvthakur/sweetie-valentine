@@ -33,14 +33,12 @@ body {
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 0.8s ease-in-out, transform 5s ease, filter 3s ease;
-  filter: drop-shadow(0 0 0 rgba(255,255,255,0));
+  transition: opacity 0.8s ease-in-out, transform 5s ease;
 }
 
 .slideshow img.active {
   opacity: 1;
   transform: scale(1.015);
-  filter: drop-shadow(0 0 25px rgba(255, 200, 220, 0.45));
 }
 
 /* Overlay */
@@ -68,7 +66,7 @@ body {
 /* Card */
 .card {
   position: relative;
-  z-index: 4;
+  z-index: 5;
   background: white;
   width: 90%;
   max-width: 380px;
@@ -102,17 +100,19 @@ button {
   border: none;
   font-size: 16px;
   cursor: pointer;
+  position: absolute;
+  z-index: 10;
 }
 
 #yes {
   background: #ff4d6d;
   color: white;
+  left: 0;
 }
 
 #no {
   background: #ddd;
-  position: fixed; /* IMPORTANT */
-  z-index: 10;
+  left: 140px; /* beside YES on load */
 }
 
 /* Hearts */
@@ -128,27 +128,25 @@ button {
   100% { transform: translateY(110vh); opacity: 0; }
 }
 
-/* Celebration sparkles */
-.sparkle {
+/* Fireworks */
+.firework {
   position: fixed;
-  font-size: 22px;
-  animation: pop 1.2s ease-out forwards;
-  z-index: 8;
+  font-size: 34px;
+  animation: explode 1.4s ease-out forwards;
+  z-index: 9;
 }
 
-@keyframes pop {
+@keyframes explode {
   0% { transform: scale(0); opacity: 1; }
-  100% { transform: scale(2); opacity: 0; }
+  100% { transform: scale(3.5); opacity: 0; }
 }
 </style>
 </head>
 
 <body>
 
-<!-- BACKGROUND MUSIC -->
 <audio id="bgMusic" src="music.mp3" loop></audio>
 
-<!-- SLIDESHOW -->
 <div class="slideshow" id="slideshow">
   <img src="images/1.jpg">
   <img src="images/2.jpg">
@@ -163,11 +161,8 @@ button {
 </div>
 
 <div class="overlay" id="overlay"></div>
-
-<!-- LOVE MESSAGE -->
 <div class="love-message" id="loveMessage"></div>
 
-<!-- CARD -->
 <div class="card" id="card">
   <h1>Anamika 💖</h1>
   <p>
@@ -197,94 +192,86 @@ const bgMusic = document.getElementById("bgMusic");
 let current = 0;
 let started = false;
 
-// INITIAL NO BUTTON POSITION
-moveNoButton();
-
-// ULTRA SMART NO BUTTON AVOIDANCE 😈
+/* NO BUTTON ESCAPES ONLY WHEN CURSOR NEAR */
 document.addEventListener("mousemove", (e) => {
-  const rect = noBtn.getBoundingClientRect();
-  const dx = e.clientX - (rect.left + rect.width / 2);
-  const dy = e.clientY - (rect.top + rect.height / 2);
-  const distance = Math.sqrt(dx*dx + dy*dy);
+  if (started) return;
 
-  if (distance < 120) {
-    moveNoButton();
+  const r = noBtn.getBoundingClientRect();
+  const d = Math.hypot(
+    e.clientX - (r.left + r.width / 2),
+    e.clientY - (r.top + r.height / 2)
+  );
+
+  if (d < 120) {
+    const maxX = window.innerWidth - r.width - 20;
+    const maxY = window.innerHeight - r.height - 20;
+    noBtn.style.left = Math.random() * maxX + "px";
+    noBtn.style.top = Math.random() * maxY + "px";
   }
 });
 
-// Mobile touch safety
-document.addEventListener("touchstart", () => {
-  moveNoButton();
-});
-
-function moveNoButton() {
-  const padding = 20;
-  const maxX = window.innerWidth - noBtn.offsetWidth - padding;
-  const maxY = window.innerHeight - noBtn.offsetHeight - padding;
-
-  const x = Math.random() * maxX;
-  const y = Math.random() * maxY;
-
-  noBtn.style.left = x + "px";
-  noBtn.style.top = y + "px";
-}
-
-// YES CLICK ❤️
+/* YES CLICK */
 yesBtn.addEventListener("click", () => {
   if (started) return;
   started = true;
 
-  bgMusic.volume = 0.6;
-  bgMusic.play().catch(()=>{});
+  noBtn.style.display = "none";
+  startFireworks();
 
-  card.style.display = "none";
-  noBtn.style.display = "none"; // hide NO forever 😌
-  slideshow.style.display = "block";
-  overlay.style.display = "block";
+  setTimeout(() => {
+    bgMusic.volume = 0.6;
+    bgMusic.play().catch(()=>{});
 
-  images[0].classList.add("active");
+    card.style.display = "none";
+    slideshow.style.display = "block";
+    overlay.style.display = "block";
 
-  setInterval(() => {
-    images[current].classList.remove("active");
-    current = (current + 1) % images.length;
-    images[current].classList.add("active");
-  }, 1800);
+    images[0].classList.add("active");
+    setInterval(() => {
+      images[current].classList.remove("active");
+      current = (current + 1) % images.length;
+      images[current].classList.add("active");
+    }, 1800);
 
-  startHeartRain();
-  startCelebration();
-  startTypingMessage();
+    startHeartRain();
+    startTypingMessage();
+  }, 2200);
 });
 
-// HEART SHOWER ❤️💖💗
+/* FULL-SCREEN FIREWORK CELEBRATION */
+function startFireworks() {
+  for (let wave = 0; wave < 3; wave++) {
+    setTimeout(() => {
+      for (let i = 0; i < 40; i++) {
+        const f = document.createElement("div");
+        f.className = "firework";
+        f.innerText = "🎆";
+        f.style.left = Math.random() * 100 + "vw";
+        f.style.top = Math.random() * 100 + "vh";
+        document.body.appendChild(f);
+        setTimeout(() => f.remove(), 1400);
+      }
+    }, wave * 500);
+  }
+}
+
+/* HEART RAIN */
 function startHeartRain() {
   const hearts = ["❤️","💖","💗"];
   setInterval(() => {
     for (let i = 0; i < 4; i++) {
-      const heart = document.createElement("div");
-      heart.className = "heart";
-      heart.innerText = hearts[Math.floor(Math.random()*hearts.length)];
-      heart.style.left = Math.random() * 100 + "vw";
-      heart.style.animationDuration = Math.random() * 2 + 2 + "s";
-      document.body.appendChild(heart);
-      setTimeout(() => heart.remove(), 4500);
+      const h = document.createElement("div");
+      h.className = "heart";
+      h.innerText = hearts[Math.floor(Math.random()*hearts.length)];
+      h.style.left = Math.random() * 100 + "vw";
+      h.style.animationDuration = Math.random() * 2 + 2 + "s";
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), 4500);
     }
   }, 220);
 }
 
-// CELEBRATION ✨
-function startCelebration() {
-  for (let i = 0; i < 45; i++) {
-    const s = document.createElement("div");
-    s.className = "sparkle";
-    s.innerText = "✨";
-    s.style.left = Math.random() * 100 + "vw";
-    s.style.top = Math.random() * 100 + "vh";
-    document.body.appendChild(s);
-    setTimeout(() => s.remove(), 1200);
-  }
-}
-
-// TYPING MESSAGE 💬❤️
+/* TYPING MESSAGE */
 function startTypingMessage() {
   const text = "Forever yours 💍❤️\nThank you for choosing me, my Sweetie Baby 😘";
   let i = 0;
