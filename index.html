@@ -16,68 +16,14 @@ body {
   min-height: 100vh;
   overflow: hidden;
   background: linear-gradient(135deg, #ff9a9e, #fad0c4, #ffd1ff);
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
-/* ---------- CARD ---------- */
-.card {
-  position: relative;
-  z-index: 5;
-  background: #ff4d6d;
-  width: 90%;
-  max-width: 360px;
-  padding: 28px 22px;
-  border-radius: 25px;
-  text-align: center;
-  color: white;
-  box-shadow: 0 25px 50px rgba(255,77,109,0.45);
-}
-
-.card h1 {
-  margin: 0;
-  font-size: 24px;
-}
-
-.card p {
-  font-size: 15px;
-  margin: 12px 0 20px;
-}
-
-/* ---------- BUTTONS ---------- */
-.buttons {
-  position: relative;
-  height: 50px;
-}
-
-button {
-  padding: 12px 26px;
-  border-radius: 30px;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-  position: absolute;
-}
-
-#yes {
-  background: white;
-  color: #ff4d6d;
-  left: 20px;
-}
-
-#no {
-  background: #ffe6ec;
-  color: #ff4d6d;
-  left: 150px;
-}
-
-/* ---------- SLIDESHOW ---------- */
+/* Slideshow */
 .slideshow {
   position: fixed;
   inset: 0;
-  display: none;
   z-index: 1;
+  display: none;
 }
 
 .slideshow img {
@@ -87,26 +33,29 @@ button {
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 0.8s ease;
+  transition: opacity 0.8s ease-in-out, transform 5s ease, filter 3s ease;
+  filter: drop-shadow(0 0 0 rgba(255,255,255,0));
 }
 
 .slideshow img.active {
   opacity: 1;
+  transform: scale(1.015);
+  filter: drop-shadow(0 0 25px rgba(255, 200, 220, 0.45));
 }
 
-/* ---------- OVERLAY ---------- */
+/* Overlay */
 .overlay {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.35);
-  display: none;
   z-index: 2;
+  display: none;
 }
 
-/* ---------- MESSAGE ---------- */
+/* Love message */
 .love-message {
   position: fixed;
-  bottom: 12%;
+  bottom: 14%;
   width: 100%;
   text-align: center;
   font-size: 22px;
@@ -116,7 +65,57 @@ button {
   text-shadow: 0 4px 10px rgba(0,0,0,0.6);
 }
 
-/* ---------- HEART RAIN ---------- */
+/* Card */
+.card {
+  position: relative;
+  z-index: 4;
+  background: white;
+  width: 90%;
+  max-width: 380px;
+  padding: 25px;
+  border-radius: 25px;
+  text-align: center;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.35);
+  margin: auto;
+}
+
+h1 {
+  color: #ff4d6d;
+  font-size: 24px;
+}
+
+p {
+  color: #555;
+  font-size: 15px;
+}
+
+/* Buttons */
+.buttons {
+  margin-top: 20px;
+  position: relative;
+  height: 60px;
+}
+
+button {
+  padding: 12px 25px;
+  border-radius: 30px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#yes {
+  background: #ff4d6d;
+  color: white;
+}
+
+#no {
+  background: #ddd;
+  position: fixed; /* IMPORTANT */
+  z-index: 10;
+}
+
+/* Hearts */
 .heart {
   position: fixed;
   font-size: 26px;
@@ -125,29 +124,31 @@ button {
 }
 
 @keyframes fall {
-  from { transform: translateY(-10px); opacity: 1; }
-  to { transform: translateY(110vh); opacity: 0; }
+  0% { transform: translateY(-10px); opacity: 1; }
+  100% { transform: translateY(110vh); opacity: 0; }
 }
 
-/* ---------- FIREWORK ---------- */
-.firework {
+/* Celebration sparkles */
+.sparkle {
   position: fixed;
-  font-size: 32px;
-  animation: explode 1.2s ease-out forwards;
-  z-index: 9;
+  font-size: 22px;
+  animation: pop 1.2s ease-out forwards;
+  z-index: 8;
 }
 
-@keyframes explode {
-  from { transform: scale(0); opacity: 1; }
-  to { transform: scale(3); opacity: 0; }
+@keyframes pop {
+  0% { transform: scale(0); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
 }
 </style>
 </head>
 
 <body>
 
+<!-- BACKGROUND MUSIC -->
 <audio id="bgMusic" src="music.mp3" loop></audio>
 
+<!-- SLIDESHOW -->
 <div class="slideshow" id="slideshow">
   <img src="images/1.jpg">
   <img src="images/2.jpg">
@@ -162,12 +163,20 @@ button {
 </div>
 
 <div class="overlay" id="overlay"></div>
+
+<!-- LOVE MESSAGE -->
 <div class="love-message" id="loveMessage"></div>
 
 <!-- CARD -->
 <div class="card" id="card">
   <h1>Anamika 💖</h1>
-  <p>Will you be my Valentine? 🌹</p>
+  <p>
+    From smiles to silence,<br>
+    from chaos to calm…<br>
+    you are my favorite feeling, Sweetie Baby 😘
+  </p>
+
+  <h1>Will you be my Valentine? 🌹</h1>
 
   <div class="buttons">
     <button id="yes">YES ❤️</button>
@@ -176,8 +185,8 @@ button {
 </div>
 
 <script>
-const yesBtn = document.getElementById("yes");
 const noBtn = document.getElementById("no");
+const yesBtn = document.getElementById("yes");
 const card = document.getElementById("card");
 const slideshow = document.getElementById("slideshow");
 const overlay = document.getElementById("overlay");
@@ -188,77 +197,102 @@ const bgMusic = document.getElementById("bgMusic");
 let current = 0;
 let started = false;
 
-/* NO BUTTON AVOIDS CURSOR */
-document.addEventListener("mousemove", (e) => {
-  const r = noBtn.getBoundingClientRect();
-  const d = Math.hypot(
-    e.clientX - (r.left + r.width/2),
-    e.clientY - (r.top + r.height/2)
-  );
+// INITIAL NO BUTTON POSITION
+moveNoButton();
 
-  if (d < 120) {
-    noBtn.style.left = Math.random() * 180 + "px";
-    noBtn.style.top = Math.random() * 10 + "px";
+// ULTRA SMART NO BUTTON AVOIDANCE 😈
+document.addEventListener("mousemove", (e) => {
+  const rect = noBtn.getBoundingClientRect();
+  const dx = e.clientX - (rect.left + rect.width / 2);
+  const dy = e.clientY - (rect.top + rect.height / 2);
+  const distance = Math.sqrt(dx*dx + dy*dy);
+
+  if (distance < 120) {
+    moveNoButton();
   }
 });
 
-/* YES CLICK */
+// Mobile touch safety
+document.addEventListener("touchstart", () => {
+  moveNoButton();
+});
+
+function moveNoButton() {
+  const padding = 20;
+  const maxX = window.innerWidth - noBtn.offsetWidth - padding;
+  const maxY = window.innerHeight - noBtn.offsetHeight - padding;
+
+  const x = Math.random() * maxX;
+  const y = Math.random() * maxY;
+
+  noBtn.style.left = x + "px";
+  noBtn.style.top = y + "px";
+}
+
+// YES CLICK ❤️
 yesBtn.addEventListener("click", () => {
   if (started) return;
   started = true;
 
+  bgMusic.volume = 0.6;
+  bgMusic.play().catch(()=>{});
+
   card.style.display = "none";
+  noBtn.style.display = "none"; // hide NO forever 😌
+  slideshow.style.display = "block";
+  overlay.style.display = "block";
 
-  // Fireworks first
-  for (let i = 0; i < 70; i++) {
-    const f = document.createElement("div");
-    f.className = "firework";
-    f.innerText = "🎆";
-    f.style.left = Math.random() * 100 + "vw";
-    f.style.top = Math.random() * 100 + "vh";
-    document.body.appendChild(f);
-    setTimeout(() => f.remove(), 1200);
-  }
+  images[0].classList.add("active");
 
-  setTimeout(() => {
-    bgMusic.volume = 0.6;
-    bgMusic.play().catch(()=>{});
-
-    slideshow.style.display = "block";
-    overlay.style.display = "block";
-
-    images[0].classList.add("active");
-    setInterval(() => {
-      images[current].classList.remove("active");
-      current = (current + 1) % images.length;
-      images[current].classList.add("active");
-    }, 1800);
-
-    startHearts();
-    startTyping();
+  setInterval(() => {
+    images[current].classList.remove("active");
+    current = (current + 1) % images.length;
+    images[current].classList.add("active");
   }, 1800);
+
+  startHeartRain();
+  startCelebration();
+  startTypingMessage();
 });
 
-function startHearts() {
+// HEART SHOWER ❤️💖💗
+function startHeartRain() {
   const hearts = ["❤️","💖","💗"];
   setInterval(() => {
-    const h = document.createElement("div");
-    h.className = "heart";
-    h.innerText = hearts[Math.floor(Math.random()*hearts.length)];
-    h.style.left = Math.random() * 100 + "vw";
-    h.style.animationDuration = Math.random() * 2 + 2 + "s";
-    document.body.appendChild(h);
-    setTimeout(() => h.remove(), 4500);
-  }, 200);
+    for (let i = 0; i < 4; i++) {
+      const heart = document.createElement("div");
+      heart.className = "heart";
+      heart.innerText = hearts[Math.floor(Math.random()*hearts.length)];
+      heart.style.left = Math.random() * 100 + "vw";
+      heart.style.animationDuration = Math.random() * 2 + 2 + "s";
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 4500);
+    }
+  }, 220);
 }
 
-function startTyping() {
+// CELEBRATION ✨
+function startCelebration() {
+  for (let i = 0; i < 45; i++) {
+    const s = document.createElement("div");
+    s.className = "sparkle";
+    s.innerText = "✨";
+    s.style.left = Math.random() * 100 + "vw";
+    s.style.top = Math.random() * 100 + "vh";
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 1200);
+  }
+}
+
+// TYPING MESSAGE 💬❤️
+function startTypingMessage() {
   const text = "Forever yours 💍❤️\nThank you for choosing me, my Sweetie Baby 😘";
   let i = 0;
-  const t = setInterval(() => {
+  loveMessage.innerHTML = "";
+  const typing = setInterval(() => {
     loveMessage.innerHTML += text[i] === "\n" ? "<br>" : text[i];
     i++;
-    if (i >= text.length) clearInterval(t);
+    if (i >= text.length) clearInterval(typing);
   }, 70);
 }
 </script>
