@@ -98,6 +98,10 @@ p {
   margin-top: 22px;
   position: relative;
   height: 60px;
+  width: 100%;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 button {
@@ -108,17 +112,65 @@ button {
   cursor: pointer;
   position: absolute;
   top: 0;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 #yes {
   background: #ff4d6d;
   color: white;
   left: 0;
+  box-shadow: 0 4px 15px rgba(255, 77, 109, 0.4);
+}
+
+#yes:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(255, 77, 109, 0.6);
 }
 
 #no {
   background: #ddd;
   left: 150px; /* beside YES on load */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  transition: all 0.4s ease;
+}
+
+#no:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+/* Floating NO button state */
+#no.floating {
+  position: fixed;
+  z-index: 100;
+  transition: left 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+              top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: floatGlow 1.5s infinite alternate;
+}
+
+@keyframes floatGlow {
+  from { 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15), 0 0 8px rgba(255,255,255,0.8);
+  }
+  to { 
+    box-shadow: 0 6px 25px rgba(0,0,0,0.3), 0 0 15px rgba(255,255,255,1);
+  }
+}
+
+/* Tooltip for NO button */
+.no-tooltip {
+  position: fixed;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  z-index: 101;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  white-space: nowrap;
+  transform: translateY(-40px);
 }
 
 /* Hearts */
@@ -179,14 +231,14 @@ button {
 
 <body>
 
-<audio id="bgMusic" src="music.mp3" loop></audio>
+<audio id="bgMusic" src="https://assets.mixkit.co/music/preview/mixkit-romantic-sunset-678.mp3" loop></audio>
 
 <div class="slideshow" id="slideshow">
-  <img src="images/1.jpg">
-  <img src="images/2.jpg">
-  <img src="images/3.jpg">
-  <img src="images/4.jpg">
-  <img src="images/5.jpg">
+  <img src="https://images.unsplash.com/photo-1518568814500-bf0f8d125f46?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80">
+  <img src="https://images.unsplash.com/photo-1518495978942-83cdb633d6d6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80">
+  <img src="https://images.unsplash.com/photo-1518568814500-bf0f8d125f46?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80">
+  <img src="https://images.unsplash.com/photo-1518495978942-83cdb633d6d6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80">
+  <img src="https://images.unsplash.com/photo-1518568814500-bf0f8d125f46?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80">
 </div>
 
 <div class="overlay" id="overlay"></div>
@@ -221,58 +273,125 @@ const loveMessage = document.getElementById("loveMessage");
 const bgMusic = document.getElementById("bgMusic");
 
 let started = false;
-let escaped = false;
+let noButtonEscaped = false;
 let current = 0;
+let tooltip = null;
 
-/* NO BUTTON ESCAPES ACROSS SCREEN */
+// Create tooltip for NO button
+function createTooltip() {
+  tooltip = document.createElement("div");
+  tooltip.className = "no-tooltip";
+  tooltip.textContent = "Try to catch me! 😉";
+  document.body.appendChild(tooltip);
+}
+
+// Show tooltip near NO button
+function showTooltip(x, y) {
+  if (!tooltip) return;
+  tooltip.style.left = (x - 40) + "px";
+  tooltip.style.top = (y - 50) + "px";
+  tooltip.style.opacity = "1";
+}
+
+// Hide tooltip
+function hideTooltip() {
+  if (!tooltip) return;
+  tooltip.style.opacity = "0";
+}
+
+/* NO BUTTON ESCAPES ACROSS SCREEN - Only when cursor approaches */
 document.addEventListener("mousemove", e => {
   if (started) return;
-
+  
   const r = noBtn.getBoundingClientRect();
   const d = Math.hypot(
     e.clientX - (r.left + r.width / 2),
     e.clientY - (r.top + r.height / 2)
   );
-
-  if (d < 120) {
-
-    /* switch to full-screen escape mode */
-    if (!escaped) {
-      escaped = true;
-      noBtn.style.position = "fixed";
+  
+  // Show tooltip when cursor is near but not too close
+  if (d < 100 && d > 60 && !noButtonEscaped) {
+    showTooltip(r.left + r.width/2, r.top);
+  } else {
+    hideTooltip();
+  }
+  
+  // Start escaping when cursor gets too close
+  if (d < 60) {
+    hideTooltip();
+    
+    if (!noButtonEscaped) {
+      noButtonEscaped = true;
+      noBtn.classList.add("floating");
+      
+      // Play a sound effect for escape
+      try {
+        const escapeSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-cartoon-toy-whistle-616.mp3");
+        escapeSound.volume = 0.3;
+        escapeSound.play().catch(() => {});
+      } catch (e) {}
     }
-
+    
+    // Calculate random position within window bounds
     const maxX = window.innerWidth - r.width - 20;
     const maxY = window.innerHeight - r.height - 20;
-
-    noBtn.style.left = Math.random() * maxX + "px";
-    noBtn.style.top = Math.random() * maxY + "px";
+    
+    // Generate new position (avoiding cursor)
+    let newX, newY;
+    let attempts = 0;
+    
+    do {
+      newX = Math.random() * maxX;
+      newY = Math.random() * maxY;
+      attempts++;
+      
+      // Ensure it's far from cursor
+      const distanceFromCursor = Math.hypot(
+        e.clientX - (newX + r.width/2),
+        e.clientY - (newY + r.height/2)
+      );
+      
+      // If far enough or too many attempts, accept position
+      if (distanceFromCursor > 150 || attempts > 10) {
+        noBtn.style.left = newX + "px";
+        noBtn.style.top = newY + "px";
+        break;
+      }
+    } while (attempts < 15);
   }
 });
+
+// Create tooltip when page loads
+window.addEventListener("load", createTooltip);
 
 /* YES CLICK */
 yesBtn.addEventListener("click", () => {
   if (started) return;
   started = true;
-
+  
+  // Remove tooltip if it exists
+  if (tooltip) {
+    tooltip.remove();
+  }
+  
   bgMusic.volume = 0.6;
   bgMusic.play().catch(()=>{});
-
+  
   noBtn.style.display = "none";
   startCelebration();
-
+  
   setTimeout(() => {
     card.style.display = "none";
     slideshow.style.display = "block";
     overlay.style.display = "block";
-
+    
     images[0].classList.add("active");
     setInterval(() => {
       images[current].classList.remove("active");
       current = (current + 1) % images.length;
       images[current].classList.add("active");
     }, 2000);
-
+    
     startHeartRain();
     startTyping();
   }, 3800);
@@ -284,7 +403,7 @@ function startCelebration() {
   flash.className = "flash";
   document.body.appendChild(flash);
   setTimeout(() => flash.remove(), 1200);
-
+  
   for (let wave = 0; wave < 8; wave++) {
     setTimeout(() => {
       for (let i = 0; i < 90; i++) {
@@ -298,7 +417,7 @@ function startCelebration() {
       }
     }, wave * 350);
   }
-
+  
   const confetti = ["🎉","🎊","❤️","💖","🌹"];
   for (let i = 0; i < 150; i++) {
     const c = document.createElement("div");
@@ -338,6 +457,22 @@ function startTyping() {
     if (i >= text.length) clearInterval(t);
   }, 70);
 }
+
+// Handle window resize - keep NO button within bounds if it's floating
+window.addEventListener("resize", () => {
+  if (noButtonEscaped) {
+    const r = noBtn.getBoundingClientRect();
+    const maxX = window.innerWidth - r.width - 20;
+    const maxY = window.innerHeight - r.height - 20;
+    
+    // Ensure button stays within bounds
+    let currentX = parseInt(noBtn.style.left) || 0;
+    let currentY = parseInt(noBtn.style.top) || 0;
+    
+    if (currentX > maxX) noBtn.style.left = maxX + "px";
+    if (currentY > maxY) noBtn.style.top = maxY + "px";
+  }
+});
 </script>
 
 </body>
